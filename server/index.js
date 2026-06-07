@@ -13,6 +13,8 @@ app.use(express.json());
 // Routes
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
+const workspaceRoutes = require('./routes/workspaceRoutes');
+app.use('/api/workspaces', workspaceRoutes);
 
 // Test route
 app.get('/', (req, res) => {
