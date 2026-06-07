@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nudge Chat Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    #messages { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    input { padding: 8px; width: 70%; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .message { margin-bottom: 8px; }
+    .sender { font-weight: bold; color: #6366f1; }
+  </style>
+</head>
+<body>
+  <h2>⚡ Nudge Chat Test</h2>
+
+  <div>
+    <input id="token" placeholder="Paste your JWT token here" style="width:100%; margin-bottom:10px;" />
+    <input id="workspaceId" placeholder="Paste your workspace ID here" style="width:100%; margin-bottom:10px;" />
+    <button onclick="connect()">Connect</button>
+  </div>
+
+  <br/>
+  <div id="messages"></div>
+  <input id="messageInput" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    let socket;
+
+    function connect() {
+      const token = document.getElementById('token').value;
+      const workspaceId = document.getElementById('workspaceId').value;
+
+      socket = io('http://localhost:5000', {
+        auth: { token }
+      });
+
+      socket.on('connect', () => {
+        addMessage('System', 'Connected to Nudge! ✅');
+        socket.emit('join_workspace', workspaceId);
+      });
+
+      socket.on('receive_message', (message) => {
+        addMessage(message.sender.name, message.content);
+      });
+
+      socket.on('connect_error', (err) => {
+        addMessage('Error', err.message);
+      });
+    }
+
+    function sendMessage() {
+      const workspaceId = document.getElementById('workspaceId').value;
+      const content = document.getElementById('messageInput').value;
+      if (!content) return;
+
+      socket.emit('send_message', { workspaceId, content });
+      document.getElementById('messageInput').value = '';
+    }
+
+    function addMessage(sender, content) {
+      const div = document.createElement('div');
+      div.className = 'message';
+      div.innerHTML = `<span class="sender">${sender}:</span> ${content}`;
+      document.getElementById('messages').appendChild(div);
+      document.getElementById('messages').scrollTop = 999999;
+    }
+  </script>
+</body>
+</html>
