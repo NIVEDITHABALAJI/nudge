@@ -50,72 +50,82 @@ const Chat = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <div style={styles.header}>
-        <button style={styles.backBtn} onClick={() => navigate('/dashboard')}>← Back</button>
-        <h2 style={styles.wsName}>⚡ {workspace?.name || 'Loading...'}</h2>
-        <span style={styles.members}>{workspace?.members?.length} member(s)</span>
+      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="text-gray-400 hover:text-indigo-600 transition text-sm font-medium"
+        >
+          ← Back
+        </button>
+        <div className="flex-1">
+          <h2 className="text-lg font-bold text-gray-800">⚡ {workspace?.name || 'Loading...'}</h2>
+          <p className="text-xs text-gray-400">{workspace?.members?.length} member(s)</p>
+        </div>
+        <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-xs text-green-600 font-medium">Live</span>
+        </div>
       </div>
 
       {/* Messages */}
-      <div style={styles.messages}>
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
         {messages.length === 0 ? (
-          <p style={styles.empty}>No messages yet — say hello! 👋</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <p className="text-4xl mb-3">👋</p>
+            <p className="text-lg font-medium">No messages yet</p>
+            <p className="text-sm">Say hello to your team!</p>
+          </div>
         ) : (
-          messages.map((msg) => (
-            <div
-              key={msg._id}
-              style={{
-                ...styles.message,
-                ...(msg.sender._id === user?.id ? styles.myMessage : styles.otherMessage)
-              }}
-            >
-              {msg.sender._id !== user?.id && (
-                <p style={styles.senderName}>{msg.sender.name}</p>
-              )}
-              <p style={styles.messageContent}>{msg.content}</p>
-              <p style={styles.messageTime}>
-                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          ))
+          messages.map((msg) => {
+            const isMe = msg.sender._id === user?.id;
+            return (
+              <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs lg:max-w-md ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                  {!isMe && (
+                    <span className="text-xs text-indigo-500 font-semibold mb-1 ml-1">
+                      {msg.sender.name}
+                    </span>
+                  )}
+                  <div className={`px-4 py-2.5 rounded-2xl text-sm ${
+                    isMe
+                      ? 'bg-indigo-600 text-white rounded-br-sm'
+                      : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
+                  }`}>
+                    {msg.content}
+                  </div>
+                  <span className="text-xs text-gray-400 mt-1 mx-1">
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            );
+          })
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <form style={styles.inputArea} onSubmit={sendMessage}>
-        <input
-          style={styles.input}
-          type="text"
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-        />
-        <button style={styles.sendBtn} type="submit">Send ⚡</button>
-      </form>
+      <div className="bg-white border-t border-gray-100 px-6 py-4">
+        <form onSubmit={sendMessage} className="flex gap-3 items-center">
+          <input
+            className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
+            type="text"
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <button
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition"
+            type="submit"
+          >
+            ⚡ Send
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: { display: 'flex', flexDirection: 'column', height: '100vh', background: '#f0f2f5' },
-  header: { display: 'flex', alignItems: 'center', gap: '16px', background: 'white', padding: '16px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  backBtn: { padding: '8px 16px', background: '#f0f2f5', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-  wsName: { margin: 0, color: '#333', flex: 1 },
-  members: { color: '#888', fontSize: '14px' },
-  messages: { flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' },
-  empty: { textAlign: 'center', color: '#888', marginTop: '48px' },
-  message: { maxWidth: '60%', padding: '12px 16px', borderRadius: '12px', wordBreak: 'break-word' },
-  myMessage: { alignSelf: 'flex-end', background: '#6366f1', color: 'white', borderBottomRightRadius: '4px' },
-  otherMessage: { alignSelf: 'flex-start', background: 'white', color: '#333', borderBottomLeftRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' },
-  senderName: { fontSize: '12px', fontWeight: '600', marginBottom: '4px', color: '#6366f1' },
-  messageContent: { margin: 0, fontSize: '14px' },
-  messageTime: { margin: 0, fontSize: '11px', opacity: 0.7, marginTop: '4px', textAlign: 'right' },
-  inputArea: { display: 'flex', gap: '12px', padding: '16px 24px', background: 'white', boxShadow: '0 -2px 8px rgba(0,0,0,0.08)' },
-  input: { flex: 1, padding: '12px 16px', border: '1px solid #ddd', borderRadius: '24px', fontSize: '14px', outline: 'none' },
-  sendBtn: { padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '24px', cursor: 'pointer', fontWeight: '600' }
 };
 
 export default Chat;

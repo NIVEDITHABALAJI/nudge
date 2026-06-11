@@ -10,9 +10,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchWorkspaces();
-  }, []);
+  useEffect(() => { fetchWorkspaces(); }, []);
 
   const fetchWorkspaces = async () => {
     try {
@@ -37,54 +35,80 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => { logout(); navigate('/login'); };
+
+  const colors = ['from-indigo-500 to-purple-500', 'from-pink-500 to-rose-500', 'from-green-500 to-teal-500', 'from-orange-500 to-amber-500', 'from-blue-500 to-cyan-500'];
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <div style={styles.navbar}>
-        <h1 style={styles.logo}>⚡ Nudge</h1>
-        <div style={styles.navRight}>
-          <span style={styles.userName}>👋 {user?.name}</span>
-          <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+      <nav className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-indigo-600">⚡ Nudge</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-gray-700 font-medium text-sm">{user?.name}</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-500 hover:text-red-500 transition"
+          >
+            Logout
+          </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Main Content */}
-      <div style={styles.main}>
-        <h2 style={styles.heading}>Your Workspaces</h2>
+      {/* Main */}
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800">Your Workspaces</h2>
+          <p className="text-gray-500 mt-1">Collaborate with your team in real-time</p>
+        </div>
 
         {/* Create Workspace */}
-        <form onSubmit={handleCreateWorkspace} style={styles.createForm}>
+        <form onSubmit={handleCreateWorkspace} className="flex gap-3 mb-10">
           <input
-            style={styles.input}
+            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             type="text"
             placeholder="New workspace name..."
             value={newWorkspaceName}
             onChange={(e) => setNewWorkspaceName(e.target.value)}
           />
-          <button style={styles.createBtn} type="submit">+ Create</button>
+          <button
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition"
+            type="submit"
+          >
+            + Create
+          </button>
         </form>
 
-        {/* Workspace List */}
+        {/* Workspaces Grid */}
         {loading ? (
-          <p>Loading workspaces...</p>
+          <div className="text-center py-20 text-gray-400">Loading workspaces...</div>
         ) : workspaces.length === 0 ? (
-          <p style={styles.empty}>No workspaces yet — create your first one! 🚀</p>
+          <div className="text-center py-20">
+            <p className="text-5xl mb-4">🚀</p>
+            <p className="text-gray-500 text-lg">No workspaces yet — create your first one!</p>
+          </div>
         ) : (
-          <div style={styles.grid}>
-            {workspaces.map((ws) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {workspaces.map((ws, index) => (
               <div
                 key={ws._id}
-                style={styles.card}
                 onClick={() => navigate(`/chat/${ws._id}`)}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
               >
-                <h3 style={styles.wsName}>{ws.name}</h3>
-                <p style={styles.wsMeta}>{ws.members.length} member(s)</p>
-                <p style={styles.wsInvite}>Invite: {ws.inviteCode}</p>
+                <div className={`h-2 bg-gradient-to-r ${colors[index % colors.length]}`} />
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{ws.name}</h3>
+                  <p className="text-gray-400 text-sm mb-4">{ws.members.length} member(s)</p>
+                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                    <span className="text-xs text-gray-400">Invite:</span>
+                    <span className="text-xs font-mono text-indigo-500">{ws.inviteCode}</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -92,26 +116,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: { minHeight: '100vh', background: '#f0f2f5' },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '16px 32px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  logo: { color: '#6366f1', margin: 0 },
-  navRight: { display: 'flex', alignItems: 'center', gap: '16px' },
-  userName: { color: '#333', fontWeight: '500' },
-  logoutBtn: { padding: '8px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' },
-  main: { maxWidth: '900px', margin: '0 auto', padding: '32px 16px' },
-  heading: { color: '#333', marginBottom: '24px' },
-  createForm: { display: 'flex', gap: '12px', marginBottom: '32px' },
-  input: { flex: 1, padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' },
-  createBtn: { padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-  empty: { color: '#888', textAlign: 'center', marginTop: '48px', fontSize: '18px' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' },
-  card: { background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', cursor: 'pointer', transition: 'transform 0.2s', },
-  wsName: { color: '#333', marginBottom: '8px' },
-  wsMeta: { color: '#888', fontSize: '14px', marginBottom: '4px' },
-  wsInvite: { color: '#6366f1', fontSize: '12px', fontFamily: 'monospace' }
 };
 
 export default Dashboard;
