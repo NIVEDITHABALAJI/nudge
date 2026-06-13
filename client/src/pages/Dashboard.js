@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getWorkspaces, createWorkspace } from '../utils/api';
@@ -30,8 +31,9 @@ const Dashboard = () => {
       const { data } = await createWorkspace({ name: newWorkspaceName });
       setWorkspaces([...workspaces, data.workspace]);
       setNewWorkspaceName('');
+      toast.success('Workspace created! 🚀');
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to create workspace');
     }
   };
 

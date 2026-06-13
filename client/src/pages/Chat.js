@@ -12,6 +12,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [workspace, setWorkspace] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -21,6 +22,9 @@ const Chat = () => {
     newSocket.emit('join_workspace', workspaceId);
     newSocket.on('receive_message', (message) => {
       setMessages((prev) => [...prev, message]);
+    });
+    newSocket.on('online_users', (users) => {
+      setOnlineUsers(users);
     });
     return () => newSocket.disconnect();
   }, [workspaceId]);
@@ -59,14 +63,35 @@ const Chat = () => {
         >
           ← Back
         </button>
+        <button
+          onClick={() => navigate(`/tasks/${workspaceId}`)}
+          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-lg transition"
+        >
+          📋 Tasks
+        </button>
         <div className="flex-1">
           <h2 className="text-lg font-bold text-gray-800">⚡ {workspace?.name || 'Loading...'}</h2>
           <p className="text-xs text-gray-400">{workspace?.members?.length} member(s)</p>
         </div>
-        <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-xs text-green-600 font-medium">Live</span>
-        </div>
+        <div className="flex items-center gap-3">
+  <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+    <span className="text-xs text-green-600 font-medium">
+      {onlineUsers.length} online
+    </span>
+  </div>
+  <div className="flex -space-x-2">
+    {onlineUsers.slice(0, 4).map((u, i) => (
+      <div
+        key={i}
+        className="w-7 h-7 rounded-full bg-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-semibold"
+        title={u.name}
+      >
+        {u.name?.charAt(0).toUpperCase()}
+      </div>
+    ))}
+  </div>
+</div>
       </div>
 
       {/* Messages */}
