@@ -103,6 +103,25 @@ socket.on('add_reaction', async (data) => {
   }
 });
 
+// Video call signaling
+socket.on('call_user', (data) => {
+  io.to(data.workspaceId).emit('incoming_call', {
+    from: socket.user.name,
+    fromId: socket.user._id,
+    signal: data.signal
+  });
+});
+
+socket.on('answer_call', (data) => {
+  io.to(data.workspaceId).emit('call_accepted', {
+    signal: data.signal
+  });
+});
+
+socket.on('end_call', (data) => {
+  io.to(data.workspaceId).emit('call_ended');
+});
+
   socket.on('leave_workspace', (workspaceId) => {
     socket.leave(workspaceId);
   });

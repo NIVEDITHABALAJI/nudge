@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getMessages, getWorkspace } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { io } from 'socket.io-client';
+import VideoCall from '../components/VideoCall';
 
 const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
@@ -72,9 +73,9 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate('/dashboard')}
           className="text-gray-400 hover:text-indigo-600 transition text-sm font-medium"
@@ -87,8 +88,16 @@ const Chat = () => {
         >
           📋 Tasks
         </button>
+        {socket && (
+          <VideoCall
+            socket={socket}
+            workspaceId={workspaceId}
+            user={user}
+            onClose={() => {}}
+          />
+        )}
         <div className="flex-1">
-          <h2 className="text-lg font-bold text-gray-800">⚡ {workspace?.name || 'Loading...'}</h2>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white">⚡ {workspace?.name || 'Loading...'}</h2>
           <p className="text-xs text-gray-400">{workspace?.members?.length} member(s)</p>
         </div>
         <div className="flex items-center gap-3">
@@ -143,7 +152,7 @@ const Chat = () => {
                       className={`px-4 py-2.5 rounded-2xl text-sm cursor-pointer ${
                         isMe
                           ? 'bg-indigo-600 text-white rounded-br-sm'
-                          : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
+                          : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100 dark:border-gray-600'
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -184,10 +193,10 @@ const Chat = () => {
                             e.stopPropagation();
                             addReaction(msg._id, reaction.emoji);
                           }}
-                          className="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-2 py-0.5 text-xs hover:bg-indigo-50 transition"
+                          className="flex items-center gap-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full px-2 py-0.5 text-xs hover:bg-indigo-50 transition"
                         >
                           <span>{reaction.emoji}</span>
-                          <span className="text-gray-500">{reaction.users.length}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{reaction.users.length}</span>
                         </button>
                       ))}
                     </div>
@@ -205,10 +214,10 @@ const Chat = () => {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-100 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 px-6 py-4">
         <form onSubmit={sendMessage} className="flex gap-3 items-center">
           <input
-            className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
+            className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             type="text"
             placeholder="Type a message..."
             value={newMessage}
