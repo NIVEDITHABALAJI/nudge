@@ -73,6 +73,36 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Add reaction to message
+socket.on('add_reaction', async (data) => {
+  try {
+    const { messageId, emoji, workspaceId } = data;
+    const message = await Message.findById(messageId);
+    if (!message) return;
+
+    const existingReaction = message.reactions.find(r => r.emoji === emoji);
+    if (existingReaction) {
+      const userIndex = existingReaction.users.indexOf(socket.user._id.toString());
+      if (userIndex === -1) {
+        existingReaction.users.push(socket.user._id);
+      } else {
+        existingReaction.users.splice(userIndex, 1);
+        if (existingReaction.users.length === 0) {
+          message.reactions = message.reactions.filter(r => r.emoji !== emoji);
+        }
+      }
+    } else {
+      message.reactions.push({ emoji, users: [socket.user._id] });
+    }
+
+    await message.save();
+    const updated = await Message.findById(messageId).populate('sender', 'name email');
+    io.to(workspaceId).emit('message_updated', updated);
+  } catch (error) {
+    console.error('Reaction error:', error);
+  }
+});
+
   socket.on('leave_workspace', (workspaceId) => {
     socket.leave(workspaceId);
   });

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
@@ -9,6 +9,17 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(
     localStorage.getItem('token') || null
   );
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem('darkMode') === 'true' || false
+  );
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const login = (userData, tokenData) => {
     setUser(userData);
@@ -24,8 +35,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('darkMode', newMode);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, darkMode, toggleDarkMode }}>
       {children}
     </AuthContext.Provider>
   );
